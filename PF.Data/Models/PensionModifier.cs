@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PF.Data.Models
 {
-    public class DisabilityGroup
+    public class PensionModifier
     {
         [Key]
         public Guid Id { get; set; }
@@ -14,8 +14,7 @@ namespace PF.Data.Models
         public string Type { get; set; }
 
         [Required]
-        [Range(1, 3)]
-        public int Group { get; set; }
+        public string ModifierName { get; set; }
 
         public double? Coefficient { get; set; }
 

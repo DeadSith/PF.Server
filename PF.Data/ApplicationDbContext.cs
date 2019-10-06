@@ -21,7 +21,7 @@ namespace PF.Data
 
         public DbSet<Experience> Experiences { get; set; }
 
-        public DbSet<DisabilityGroup> DisabilityGroups { get; set; }
+        public DbSet<PensionModifier> DisabilityGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -35,7 +35,7 @@ namespace PF.Data
                 .HasForeignKey(exp => exp.PersonId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<DisabilityGroup>()
+            builder.Entity<PensionModifier>()
                 .HasMany(dg => dg.People)
                 .WithOne(p => p.DisabilityGroup)
                 .HasForeignKey(p => p.DisabilityGroupId)

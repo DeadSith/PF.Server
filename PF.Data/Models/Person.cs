@@ -22,7 +22,7 @@ namespace PF.Data.Models
 
         public Guid? DisabilityGroupId { get; set; }
 
-        public virtual DisabilityGroup DisabilityGroup { get; set; }
+        public virtual PensionModifier DisabilityGroup { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Experience> Experiences { get; set; }
