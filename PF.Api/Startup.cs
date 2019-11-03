@@ -10,7 +10,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PF.Api.Services;
 using PF.Data;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace PF.Api
 {
@@ -31,6 +33,14 @@ namespace PF.Api
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseNpgsql(Configuration.GetConnectionString("Relational"), b => b.MigrationsAssembly("PF.Api"));
+            });
+
+            services.AddScoped<IBaseSettings, BaseSettings>();
+            services.AddScoped<IPensionCalculator, PensionCalculator>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "PF API", Version = "v1" });
             });
         }
 

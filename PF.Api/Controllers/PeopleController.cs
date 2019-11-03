@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PF.Api.Services;
 using PF.Data;
 using PF.Data.Models;
 
@@ -15,10 +16,12 @@ namespace PF.Api.Controllers
     public class PeopleController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPensionCalculator _calculator;
 
-        public PeopleController(ApplicationDbContext context)
+        public PeopleController(ApplicationDbContext context, IPensionCalculator calculator)
         {
             _context = context;
+            _calculator = calculator;
         }
 
         // GET: api/People
@@ -30,9 +33,26 @@ namespace PF.Api.Controllers
 
         // GET: api/People/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetPerson(Guid id)
+        public async Task<ActionResult<double>> GetPerson(Guid id)
         {
             var person = await _context.People.FindAsync(id);
+
+            if (person == null)
+            {
+                return NotFound();
+            }
+
+            return _calculator.Calculate(person);
+        }
+
+        [HttpGet("{id}/pension")]
+        public async Task<ActionResult<Person>> GetPension(Guid id)
+        {
+            var person = await _context.People.AsNoTracking()
+                .Include(p => p.Modifier)
+                .Include(p => p.Experiences)
+                .ThenInclude(e => e.Position)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (person == null)
             {

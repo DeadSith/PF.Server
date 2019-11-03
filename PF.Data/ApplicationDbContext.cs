@@ -37,8 +37,8 @@ namespace PF.Data
 
             builder.Entity<PensionModifier>()
                 .HasMany(dg => dg.People)
-                .WithOne(p => p.DisabilityGroup)
-                .HasForeignKey(p => p.DisabilityGroupId)
+                .WithOne(p => p.Modifier)
+                .HasForeignKey(p => p.ModifierId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

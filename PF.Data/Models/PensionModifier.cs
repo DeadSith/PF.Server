@@ -16,6 +16,8 @@ namespace PF.Data.Models
         [Required]
         public string ModifierName { get; set; }
 
+        public bool Standalone { get; set; }
+
         public double? Coefficient { get; set; }
 
         public double? FixedPayment { get; set; }

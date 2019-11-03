@@ -20,9 +20,9 @@ namespace PF.Data.Models
         [Required]
         public DateTime DateOfBirth { get; set; }
 
-        public Guid? DisabilityGroupId { get; set; }
+        public Guid? ModifierId { get; set; }
 
-        public virtual PensionModifier DisabilityGroup { get; set; }
+        public virtual PensionModifier Modifier { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Experience> Experiences { get; set; }
