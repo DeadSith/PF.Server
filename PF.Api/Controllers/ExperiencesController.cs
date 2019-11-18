@@ -22,6 +22,7 @@ namespace PF.Api.Controllers
         }
 
         // PUT: api/Experiences
+        [HttpPut]
         public async Task<IActionResult> PutExperience(Experience experience)
         {
             _context.Entry(experience).State = EntityState.Modified;
