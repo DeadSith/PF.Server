@@ -28,25 +28,12 @@ namespace PF.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPeople()
         {
-            return await _context.People.ToListAsync();
+            return await _context.People.Include(p => p.Modifier).ToListAsync();
         }
 
         // GET: api/People/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<double>> GetPerson(Guid id)
-        {
-            var person = await _context.People.FindAsync(id);
-
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            return _calculator.Calculate(person);
-        }
-
-        [HttpGet("{id}/pension")]
-        public async Task<ActionResult<Person>> GetPension(Guid id)
+        public async Task<ActionResult<Person>> GetPerson(Guid id)
         {
             var person = await _context.People.AsNoTracking()
                 .Include(p => p.Modifier)
@@ -60,6 +47,23 @@ namespace PF.Api.Controllers
             }
 
             return person;
+        }
+
+        [HttpGet("{id}/pension")]
+        public async Task<ActionResult<double>> GetPension(Guid id)
+        {
+            var person = await _context.People.AsNoTracking()
+                .Include(p => p.Modifier)
+                .Include(p => p.Experiences)
+                .ThenInclude(e => e.Position)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (person == null)
+            {
+                return NotFound();
+            }
+
+            return _calculator.Calculate(person);
         }
 
         // PUT: api/People/5
