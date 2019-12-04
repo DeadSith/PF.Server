@@ -10,9 +10,16 @@ namespace PF.Api.Services
     {
         private readonly IBaseSettings _settings;
 
+        private readonly double _baseSalaryX10;
+
+        private const string MALE = "M";
+
+        private const string FEMALE = "F";
+
         public PensionCalculator(IBaseSettings settings)
         {
             _settings = settings;
+            _baseSalaryX10 = _settings.BaseSalary * 10;
         }
 
         public double Calculate(Person person)
@@ -20,7 +27,7 @@ namespace PF.Api.Services
             var pension = 0.0;
             if (CanUseStandardPension(person))
             {
-                pension = CalculateBasePension();
+                pension = CalculateBasePension(person);
             }
 
             pension = ApplyModifiers(person, pension);
@@ -29,13 +36,53 @@ namespace PF.Api.Services
 
         public bool CanUseStandardPension(Person person)
         {
-            // TODO: check if person can have default pension based on experience
-            throw new NotImplementedException();
+            bool result = true;
+
+            var age = GetDifferenceInYears(DateTime.Today, person.DateOfBirth);
+
+            if (MALE.Equals(person.Sex, StringComparison.OrdinalIgnoreCase))
+            {
+                if (age < _settings.MinAgeMale)
+                    result = false;
+            }
+            else
+            {
+                if (age < _settings.MinExpFemale)
+                    result = false;
+            }
+
+            var exp = person.Experiences?.Select(e => GetDifferenceInYears(e.EndDate, e.StartDate)).Sum();
+
+            if (exp == null)
+                return false;
+
+            if (MALE.Equals(person.Sex, StringComparison.OrdinalIgnoreCase))
+            {
+                if (exp < _settings.MinExpMale)
+                    result = false;
+            }
+            else
+            {
+                if (exp < _settings.MinExpFemale)
+                    result = false;
+            }
+
+            return result;
         }
 
-        public double CalculateBasePension()
+        public double CalculateBasePension(Person person)
         {
-            throw new NotImplementedException();
+            int exp = person.Experiences.Select(e => GetDifferenceInYears(e.EndDate, e.StartDate)).Sum();
+            double coef = exp * 0.01;
+
+            double pension = 0.01 * exp * _settings.AvgSalary;
+
+            if (pension < _settings.BaseSalary)
+                return _settings.BaseSalary;
+            else if (pension > _baseSalaryX10)
+                return _baseSalaryX10;
+            else
+                return pension;
         }
 
         public double ApplyModifiers(Person person, double pension)
@@ -75,6 +122,22 @@ namespace PF.Api.Services
             }
 
             return pension;
+        }
+
+        private int GetDifferenceInYears(DateTime date1, DateTime date2)
+        {
+            if (date2 > date1)
+            {
+                var tmp = date1;
+                date1 = date2;
+                date2 = tmp;
+            }
+
+            int years = date1.Year - date2.Year;
+            if (date2 > date1.AddYears(-years))
+                --years;
+
+            return years;
         }
     }
 }

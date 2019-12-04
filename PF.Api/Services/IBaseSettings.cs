@@ -8,5 +8,15 @@ namespace PF.Api.Services
     public interface IBaseSettings
     {
         double BaseSalary { get; }
+
+        int MinAgeMale { get; }
+
+        int MinAgeFemale { get; }
+
+        int MinExpMale { get; }
+
+        int MinExpFemale { get; }
+
+        double AvgSalary { get; }
     }
 }
