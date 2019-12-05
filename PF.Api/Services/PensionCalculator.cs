@@ -36,44 +36,25 @@ namespace PF.Api.Services
 
         public bool CanUseStandardPension(Person person)
         {
-            bool result = true;
-
             var age = GetDifferenceInYears(DateTime.Today, person.DateOfBirth);
 
-            if (MALE.Equals(person.Sex, StringComparison.OrdinalIgnoreCase))
-            {
-                if (age < _settings.MinAgeMale)
-                    result = false;
-            }
-            else
-            {
-                if (age < _settings.MinExpFemale)
-                    result = false;
-            }
+            if (MALE.Equals(person.Sex, StringComparison.OrdinalIgnoreCase) && age < _settings.MinAgeMale || age < _settings.MinAgeFemale)
+                    return false;
 
             var exp = person.Experiences?.Select(e => GetDifferenceInYears(e.EndDate, e.StartDate)).Sum();
 
             if (exp == null)
                 return false;
 
-            if (MALE.Equals(person.Sex, StringComparison.OrdinalIgnoreCase))
-            {
-                if (exp < _settings.MinExpMale)
-                    result = false;
-            }
-            else
-            {
-                if (exp < _settings.MinExpFemale)
-                    result = false;
-            }
+            if (MALE.Equals(person.Sex, StringComparison.OrdinalIgnoreCase) && exp < _settings.MinExpMale || exp < _settings.MinExpFemale)
+                return false;
 
-            return result;
+            return true;
         }
 
         public double CalculateBasePension(Person person)
         {
             int exp = person.Experiences.Select(e => GetDifferenceInYears(e.EndDate, e.StartDate)).Sum();
-            double coef = exp * 0.01;
 
             double pension = 0.01 * exp * _settings.AvgSalary;
 
