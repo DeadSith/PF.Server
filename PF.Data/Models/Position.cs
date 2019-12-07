@@ -13,8 +13,6 @@ namespace PF.Data.Models
         public string Name { get; set; }
 
         [Required]
-        public double Coefficient { get; set; }
-
-        public bool IsState { get; set; }
+        public double Salary { get; set; }
     }
 }

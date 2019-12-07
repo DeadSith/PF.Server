@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using PF.Data.Models;
 
 namespace PF.Api.Services
@@ -36,12 +34,12 @@ namespace PF.Api.Services
 
         public bool CanUseStandardPension(Person person)
         {
-            var age = GetDifferenceInYears(DateTime.Today, person.DateOfBirth);
+            var age = GetDifferenceInMonths(DateTime.Today, person.DateOfBirth) / 12;
 
             if (MALE.Equals(person.Sex, StringComparison.OrdinalIgnoreCase) && age < _settings.MinAgeMale || age < _settings.MinAgeFemale)
                     return false;
 
-            var exp = person.Experiences?.Select(e => GetDifferenceInYears(e.EndDate, e.StartDate)).Sum();
+            var exp = person.Experiences?.Select(e => GetDifferenceInMonths(e.EndDate, e.StartDate)).Sum() / 12;
 
             if (exp == null)
                 return false;
@@ -54,16 +52,39 @@ namespace PF.Api.Services
 
         public double CalculateBasePension(Person person)
         {
-            int exp = person.Experiences.Select(e => GetDifferenceInYears(e.EndDate, e.StartDate)).Sum();
+            var expInMonths = person.Experiences.Select(e => GetDifferenceInMonths(e.EndDate, e.StartDate)).Sum();
 
-            double pension = 0.01 * exp * _settings.AvgSalary;
+            var koef = expInMonths * 0.01 / 12;
+            if (koef > 0.75)
+            {
+                koef = 0.75;
+            }
+
+            // see https://www.pfu.gov.ua/33659-zarobitna-plata-dlya-obchyslennya-pensiyi-za-vikom/ for formula
+            var sumOfMonthKoefs = person.Experiences.Select(e => {
+                var months = GetDifferenceInMonths(e.EndDate, e.StartDate);
+                var k = e.Position.Salary / _settings.AvgSalary;
+                return k * months;
+            }).Sum();
+            var exp = expInMonths * 30;
+
+            var zp = _settings.AvgSalary * sumOfMonthKoefs / exp;
+
+            // see https://www.pfu.gov.ua/33650-obchyslennya-rozmiru-pensiyi-za-vikom/ for formula
+            var pension = zp * koef;
 
             if (pension < _settings.BaseSalary)
+            {
                 return _settings.BaseSalary;
+            }
             else if (pension > _baseSalaryX10)
+            {
                 return _baseSalaryX10;
+            }
             else
+            {
                 return pension;
+            }
         }
 
         public double ApplyModifiers(Person person, double pension)
@@ -105,7 +126,7 @@ namespace PF.Api.Services
             return pension;
         }
 
-        private int GetDifferenceInYears(DateTime date1, DateTime date2)
+        private int GetDifferenceInMonths(DateTime date1, DateTime date2)
         {
             if (date2 > date1)
             {
@@ -114,11 +135,9 @@ namespace PF.Api.Services
                 date2 = tmp;
             }
 
-            int years = date1.Year - date2.Year;
-            if (date2 > date1.AddYears(-years))
-                --years;
+            var diff = (date1 - date2).Days / 30;
 
-            return years;
+            return diff;
         }
     }
 }
