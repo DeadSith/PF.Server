@@ -12,7 +12,15 @@ namespace PF.Api
 {
     public class Program
     {
-        public static void Main(string[] args) => CreateWebHostBuilder(args).Build().Run();
+        public static void Main(string[] args)
+        {
+            var host = CreateWebHostBuilder(args).Build();
+            if (args.Contains("--seed"))
+            {
+                Seeder.EnsureDataSeeded(host.Services).GetAwaiter().GetResult();
+            }
+            host.Run();
+        }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) => WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()

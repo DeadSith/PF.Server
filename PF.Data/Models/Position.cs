@@ -11,8 +11,5 @@ namespace PF.Data.Models
 
         [Required]
         public string Name { get; set; }
-
-        [Required]
-        public double Salary { get; set; }
     }
 }

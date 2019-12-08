@@ -63,7 +63,7 @@ namespace PF.Api.Services
             // see https://www.pfu.gov.ua/33659-zarobitna-plata-dlya-obchyslennya-pensiyi-za-vikom/ for formula
             var sumOfMonthKoefs = person.Experiences.Select(e => {
                 var months = GetDifferenceInMonths(e.EndDate, e.StartDate);
-                var k = e.Position.Salary / _settings.AvgSalary;
+                var k = e.Salary / _settings.AvgSalary;
                 return k * months;
             }).Sum();
             var exp = expInMonths * 30;

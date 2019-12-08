@@ -22,5 +22,8 @@ namespace PF.Data.Models
 
         [Required]
         public DateTime EndDate { get; set; }
+
+        [Required]
+        public double Salary { get; set; }
     }
 }
